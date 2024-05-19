@@ -1,53 +1,98 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
-# Window 1
-root = tk.Tk()
-root.title("Window 1")
+class IceCreamOrderApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Kevin's Creamy Confections Order System")
+        self.create_main_window()
 
-# Labels
-label1 = tk.Label(root, text="3!")
-label1.pack()
-label2 = tk.Label(root, text="2!")
-label2.pack()
-label3 = tk.Label(root, text="1!")
-label3.pack()
-label4 = tk.Label(root, text="BLAST OFF!")
-label4.pack()
+    def create_main_window(self):
+        # the main window frame
+        self.main_frame = tk.Frame(self.root)
+        self.main_frame.pack()
 
-# Buttons and callback functions
-def callback1():
-    messagebox.showinfo("Callback 1", "You have entered Space")
+        # Welcome label
+        welcome_label = tk.Label(self.main_frame, text="Welcome to Kevin's Creamy Confections!", font=("Arial", 14))
+        welcome_label.pack(pady=10)
 
-def callback2():
-    messagebox.showinfo("Callback 2", "You have entered the ISS")
+        # Order button
+        order_button = tk.Button(self.main_frame, text="Order Now", command=self.create_order_window)
+        order_button.pack(pady=5)
 
-def callback3():
-    messagebox.showinfo("Callback 3", "You have left the Milky Way Galaxy")
+        # Exit button
+        exit_button = tk.Button(self.main_frame, text="Exit", command=self.root.quit)
+        exit_button.pack(pady=5)
 
-def callback4():
-    root.destroy()
+    def create_order_window(self):
+        # Destroy main window frame and create order window frame
+        self.main_frame.destroy()
+        self.order_frame = tk.Frame(self.root)
+        self.order_frame.pack()
 
-button1 = tk.Button(root, text="Go to Space", command=callback1)
-button1.pack()
-button2 = tk.Button(root, text="Go into the ISS", command=callback2)
-button2.pack()
-button3 = tk.Button(root, text="Go outside of Galaxy", command=callback3)
-button3.pack()
-button4 = tk.Button(root, text="Exit", command=callback4)
-button4.pack()
+        # Order header label
+        tk.Label(self.order_frame, text="Place Your Order", font=("Arial", 14)).pack(pady=10)
 
-# Window 2
-root2 = tk.Toplevel(root)
-root2.title("Window 2")
+        # Radio buttons for pickup or dine-in
+        self.pickup_dinein = tk.StringVar(value="Pickup")
+        tk.Radiobutton(self.order_frame, text="Pickup", variable=self.pickup_dinein, value="Pickup").pack(anchor=tk.W)
+        tk.Radiobutton(self.order_frame, text="Dine-in", variable=self.pickup_dinein, value="Dine-in").pack(anchor=tk.W)
 
-# Images 
-image1 = tk.PhotoImage(file="image1.png")
-image2 = tk.PhotoImage(file="image2.png")
+        # Combo box for choosing size
+        tk.Label(self.order_frame, text="Choose Size:").pack(anchor=tk.W)
+        self.size_var = tk.StringVar(value="One Scoop")
+        size_options = ["One Scoop", "Two Scoops", "Three Scoops"]
+        ttk.Combobox(self.order_frame, textvariable=self.size_var, values=size_options).pack(anchor=tk.W)
 
-label_image1 = tk.Label(root2, image=image1)
-label_image1.pack()
-label_image2 = tk.Label(root2, image=image2)
-label_image2.pack()
+        # Checkboxes for choosing toppings
+        tk.Label(self.order_frame, text="Choose Type:").pack(anchor=tk.W)
+        self.type_var = tk.StringVar(value="Cone")
+        type_options = ["Cone", "Sundae"]
+        ttk.Combobox(self.order_frame, textvariable=self.type_var, values=type_options).pack(anchor=tk.W)
+        
+        # Checkboxes for choosing toppings
+        tk.Label(self.order_frame, text="Choose Toppings:").pack(anchor=tk.W)
+        self.toppings = {}
+        toppings_list = ["Nuts", "Chocolate", "Strawberry Syrup", "Pineapple Syrup", "Whipped Cream", "Sprinkles", "Sugar Cookies", "Bananas", "Cherry"]
+        for topping in toppings_list:
+            self.toppings[topping] = tk.BooleanVar()
+            tk.Checkbutton(self.order_frame, text=topping, variable=self.toppings[topping]).pack(anchor=tk.W)
 
-root.mainloop()
+        # Submit order and back buttons
+        tk.Button(self.order_frame, text="Submit Order", command=self.create_confirmation_window).pack(pady=5)
+        tk.Button(self.order_frame, text="Back", command=self.create_main_window).pack(pady=5)
+
+    def create_confirmation_window(self):
+        # Generate order summary
+        order_summary = f"Order Type: {self.pickup_dinein.get()}\n"
+        order_summary += f"Size: {self.size_var.get()}\n"
+        order_summary += f"Type: {self.type_var.get()}\n"
+        order_summary += "Toppings:\n"
+        for topping, selected in self.toppings.items():
+            if selected.get():
+                order_summary += f"- {topping}\n"
+
+        # Destroy order window frame and create confirmation window frame
+        self.order_frame.destroy()
+        self.confirmation_frame = tk.Frame(self.root)
+        self.confirmation_frame.pack()
+
+        # Confirmation message label
+        tk.Label(self.confirmation_frame, text="Order Confirmation", font=("Arial", 14)).pack(pady=10)
+        tk.Label(self.confirmation_frame, text=order_summary, justify=tk.LEFT).pack(pady=10)
+
+        # Confirm, edit, and exit buttons
+        tk.Button(self.confirmation_frame, text="Confirm", command=self.confirm_order).pack(pady=5)
+        tk.Button(self.confirmation_frame, text="Edit Order", command=self.create_order_window).pack(pady=5)
+        tk.Button(self.confirmation_frame, text="Exit", command=self.root.quit).pack(pady=5)
+
+    def confirm_order(self):
+        # Display order confirmed message
+        messagebox.showinfo("Order Confirmed", "Thank you for your order!")
+        self.create_main_window()
+
+if __name__ == "__main__":
+    # Create the main tkinter window and start the application
+    root = tk.Tk()
+    app = IceCreamOrderApp(root)
+    root.mainloop()
